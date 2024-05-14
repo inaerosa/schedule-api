@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Professional {
+  id             String         @id @default(uuid())
+  name           String
+  email          String         @unique
+  password       String
+  availabilities Availability[]
+  appointments   Appointment[]
+
+  @@map("professionals")
+}
+
+model Availability {
+  id             String        @id @default(uuid())
+  professionalId String        @map("professional_id")
+  dtStart        DateTime      @unique @map("dt_start")
+  dtEnd          DateTime      @unique @map("dt_end")
+  slots          String[]
+  professional   Professional  @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
+
+  @@map("availabilities")
+}
+
+model Appointment {
+  id               String   @id @default(uuid())
+  professionalId   String   @map("professional_id")
+  availabilityId   String   @map("availability_id")
+  customerName     String   @map("customer_name")
+  customerEmail    String   @map("customer_email")
+  appointment_date DateTime @unique
+
+  professional Professional @relation(fields: [professionalId], references: [id])
+  availability Availability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}
